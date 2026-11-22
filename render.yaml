@@ -1,0 +1,23 @@
+# Render "Blueprint": describes the API service so it can be created in one click.
+services:
+  - type: web
+    name: sudeys-portfolio-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Render generates a random admin password. Read it in the service's Environment tab.
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      # Optional Telegram alerts for new messages (you type these in Render's dashboard).
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      # Your GitHub Pages site, so its browser is allowed to call this API.
+      - key: ALLOWED_ORIGINS
+        value: https://sudeysdev.github.io

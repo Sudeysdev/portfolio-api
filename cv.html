@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sudeys Feysel — CV</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,"Helvetica Neue",Arial,sans-serif;color:#1b1f2e;font-size:10.9pt;line-height:1.5;width:210mm;height:297mm;padding:16mm 17mm 12mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+header{border-bottom:2.2px solid #6d4cff;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.photo{width:31mm;height:31mm;border-radius:50%;object-fit:cover;border:2px solid #6d4cff;flex:none}
+h1{font-size:25pt;letter-spacing:-.5px;line-height:1.1}
+.role{font-size:11.5pt;color:#4a4f66;margin-top:3px;font-weight:500}
+.contact{margin-top:7px;font-size:9.4pt;color:#33384d;display:flex;flex-wrap:wrap;gap:3px 16px}
+.contact b{color:#6d4cff;font-weight:600}
+section{margin-bottom:15px}
+h2{font-size:9.6pt;text-transform:uppercase;letter-spacing:.14em;color:#6d4cff;margin-bottom:5px;font-weight:700}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.row h3{font-size:10.6pt;font-weight:650}
+.row span{color:#5a6078;font-size:9.4pt;white-space:nowrap}
+p.sub{color:#4a4f66;font-size:9.6pt}
+ul{padding-left:15px;margin-top:3px}
+li{margin-bottom:1.5px}
+.item{margin-bottom:8px}
+.skills div{margin-bottom:2.5px;display:flex;gap:10px}
+.skills b{flex:0 0 42mm;font-weight:650}
+.tech{color:#6d4cff;font-weight:600;font-size:9.2pt}
+</style>
+</head>
+<body>
+<header>
+  <div>
+  <h1>Sudeys Feysel</h1>
+  <div class="role">Computer Science &amp; Engineering Student</div>
+  <div class="contact">
+    <span><b>Email</b> feysalsudeys@gmail.com</span>
+    <span><b>Telegram</b> @sud110p</span>
+    <span><b>GitHub</b> github.com/Sudeysdev</span>
+    <span><b>Portfolio</b> sudeysdev.github.io</span>
+  </div>
+  </div>
+  <img class="photo" src="photo-cv.jpg" alt="Sudeys Feysel">
+</header>
+
+<section>
+  <h2>Profile</h2>
+  <p>Computer Science and Engineering student at Adama Science and Technology University with a strong base in Java, C++ and algorithms. I build practical web applications with HTML, CSS and JavaScript, and I am growing into full-stack development with Node.js and databases. Seeking an internship where I can learn from a team and ship real software.</p>
+</section>
+
+<section>
+  <h2>Education</h2>
+  <div class="row"><h3>BSc. Computer Science and Engineering</h3><span>Present</span></div>
+  <p class="sub">Adama Science and Technology University (ASTU), Ethiopia</p>
+  <p style="margin-top:3px"><b>Coursework:</b> Design and Analysis of Algorithms (dynamic programming, BFS/DFS, shortest paths, minimum spanning trees), Object-Oriented Programming, Database Systems, Discrete Mathematics, Linear Algebra, Signals and Systems.</p>
+</section>
+
+<section>
+  <h2>Projects</h2>
+  <div class="item">
+    <div class="row"><h3>STUDYX — Student Command Center</h3><span class="tech">HTML · CSS · JavaScript</span></div>
+    <ul>
+      <li>Single dashboard for subjects, assignments and a weekly timetable, with a GPA calculator.</li>
+      <li>Built a Pomodoro focus timer, expense tracker and study-streak counter with dark mode.</li>
+      <li>Saves all data in the browser (localStorage), so it works with no account or server.</li>
+    </ul>
+  </div>
+  <div class="item">
+    <div class="row"><h3>Quiz Game</h3><span class="tech">HTML · CSS · JavaScript</span></div>
+    <ul>
+      <li>Multiple-choice quiz with live score, question counter, progress bar and instant answer feedback.</li>
+      <li>Start screen, results screen and one-click restart; published on GitHub.</li>
+    </ul>
+  </div>
+  <div class="item">
+    <div class="row"><h3>Clinic Appointment Management System</h3><span class="tech">Database Systems</span></div>
+    <ul>
+      <li>Group database project for the ASTU CSE Database Systems course.</li>
+    </ul>
+  </div>
+  <div class="item">
+    <div class="row"><h3>Full-Stack Portfolio</h3><span class="tech">Node.js · SQLite · REST API</span></div>
+    <ul>
+      <li>Personal site with its own REST API and SQLite database: contact messages are stored, and projects are managed from a password-protected admin dashboard.</li>
+      <li>Includes input validation, rate limiting and token-based admin login.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="skills">
+  <h2>Skills</h2>
+  <div><b>Strong</b>Java, C++, HTML5, CSS3, algorithms and data structures, OOP</div>
+  <div><b>Working knowledge</b>JavaScript, SQL, Node.js, Git and GitHub, REST APIs, SQLite</div>
+  <div><b>Tools</b>VS Code, IntelliJ IDEA, Git, GitHub Pages</div>
+</section>
+
+</body>
+</html>

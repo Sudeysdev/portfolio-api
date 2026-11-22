@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Admin — Sudeys Portfolio</title>
+<style>
+:root{--bg:#0a0b10;--bg2:#10121a;--card:#141722;--line:#23273a;--text:#e8eaf2;--muted:#9aa1b8;--a1:#7c5cff;--a2:#22d3ee;--grad:linear-gradient(135deg,var(--a1),var(--a2));--bad:#f87171;--ok:#34d399}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;min-height:100vh}
+[hidden]{display:none!important}
+.wrap{width:min(980px,100% - 32px);margin:0 auto}
+header{border-bottom:1px solid var(--line);background:var(--bg2)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;gap:12px}
+header b{font-size:1.05rem}
+header a{color:var(--muted);font-size:.9rem;text-decoration:none}
+button,.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--text);padding:9px 16px;border-radius:10px;font-weight:600;font-size:.9rem}
+button:hover{border-color:var(--a2)}
+button.primary{background:var(--grad);border:none;color:#fff}
+button.danger{color:var(--bad)}
+button:disabled{opacity:.6;cursor:wait}
+input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:11px 13px;border-radius:10px;font:inherit;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--a2)}
+label{display:block;font-size:.82rem;color:var(--muted);margin:12px 0 5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+#login{max-width:380px;margin:12vh auto 0}
+#login h1{font-size:1.4rem;margin-bottom:6px}
+.err{color:var(--bad);font-size:.9rem;min-height:1.3em;margin-top:10px}
+.tabs{display:flex;gap:8px;margin:24px 0 18px;flex-wrap:wrap}
+.tabs button.on{background:var(--grad);border:none;color:#fff}
+.badge{background:var(--bad);color:#fff;border-radius:99px;font-size:.72rem;padding:1px 7px;margin-left:6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px}
+.stat strong{display:block;font-size:1.9rem}
+.stat span{color:var(--muted);font-size:.85rem}
+.chart{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:14px}
+.chart div{flex:1;background:var(--grad);border-radius:5px 5px 0 0;min-height:3px;position:relative}
+.chart small{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-size:.62rem;color:var(--muted);white-space:nowrap}
+.item{display:grid;gap:8px;margin-bottom:12px}
+.item.unread{border-color:var(--a1)}
+.item .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.item .meta{color:var(--muted);font-size:.84rem}
+.item p{white-space:pre-wrap;word-break:break-word}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions a{text-decoration:none;display:inline-block}
+.empty{color:var(--muted);text-align:center;padding:30px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+.pill{font-size:.72rem;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--muted)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:11px 20px;border-radius:12px;opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<section id="login" class="card">
+  <h1>Admin login</h1>
+  <p style="color:var(--muted);font-size:.92rem">Enter the admin password to manage your portfolio.</p>
+  <form id="loginForm">
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" required autofocus>
+    <button class="primary" style="width:100%;margin-top:16px" id="loginBtn">Sign in</button>
+    <div class="err" id="loginErr" role="alert"></div>
+  </form>
+</section>
+
+<div id="app" hidden>
+  <header><div class="wrap">
+    <b>Portfolio admin</b>
+    <div style="display:flex;gap:14px;align-items:center"><a href="./" target="_blank">View site ↗</a><button id="logout">Log out</button></div>
+  </div></header>
+  <main class="wrap">
+    <div class="tabs" id="tabs">
+      <button data-t="stats" class="on">Overview</button>
+      <button data-t="messages">Messages <span class="badge" id="unread" hidden>0</span></button>
+      <button data-t="projects">Projects</button>
+    </div>
+
+    <section id="t-stats"></section>
+    <section id="t-messages" hidden></section>
+    <section id="t-projects" hidden></section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="config.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const API=(window.PORTFOLIO_API||'').replace(/\/$/,'');
+let token=null;try{token=sessionStorage.getItem('adminToken')}catch(e){}
+
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2200)}
+
+async function call(path,method='GET',body){
+  const r=await fetch(API+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});
+  if(r.status===401&&path!=='/api/admin/login'){logout();throw new Error('Session expired. Please sign in again.')}
+  const data=r.status===204?null:await r.json().catch(()=>({error:'Unexpected response from server'}));
+  if(!r.ok)throw new Error((data&&data.error)||'Request failed');
+  return data;
+}
+
+function showApp(){$('#login').hidden=true;$('#app').hidden=false;show('stats')}
+function logout(){token=null;try{sessionStorage.removeItem('adminToken')}catch(e){}$('#app').hidden=true;$('#login').hidden=false;$('#pw').value=''}
+
+$('#loginForm').onsubmit=async e=>{
+  e.preventDefault();$('#loginErr').textContent='';$('#loginBtn').disabled=true;
+  try{
+    const d=await call('/api/admin/login','POST',{password:$('#pw').value});
+    token=d.token;try{sessionStorage.setItem('adminToken',token)}catch(e){}
+    showApp();
+  }catch(err){$('#loginErr').textContent=err.message}
+  finally{$('#loginBtn').disabled=false}
+};
+$('#logout').onclick=logout;
+
+$('#tabs').onclick=e=>{const b=e.target.closest('button[data-t]');if(b)show(b.dataset.t)};
+function show(t){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  ['stats','messages','projects'].forEach(x=>$('#t-'+x).hidden=x!==t);
+  ({stats:loadStats,messages:loadMessages,projects:loadProjects})[t]().catch(e=>toast(e.message));
+}
+
+// ----- overview -----
+async function loadStats(){
+  const s=await call('/api/admin/stats'),box=$('#t-stats');box.replaceChildren();
+  const g=el('div','stats');
+  [['Total visits',s.visits_total],['Messages',s.messages_total],['Unread',s.messages_unread],['Projects',s.projects]].forEach(([l,v])=>{
+    const c=el('div','card stat');c.append(el('strong',null,v),el('span',null,l));g.append(c)});
+  box.append(g);
+  const c=el('div','card');c.append(el('b',null,'Visits, last 14 days'));
+  const ch=el('div','chart');
+  const max=Math.max(1,...s.visits_by_day.map(d=>d.count));
+  if(!s.visits_by_day.length)c.append(el('p','empty','No visits recorded yet.'));
+  s.visits_by_day.forEach(d=>{const b=el('div');b.style.height=(d.count/max*100)+'%';b.title=d.day+': '+d.count;b.append(el('small',null,d.day.slice(5)));ch.append(b)});
+  if(s.visits_by_day.length){const sp=el('div');sp.style.height='22px';c.append(ch,sp)}
+  box.append(c);
+  setUnread(s.messages_unread);
+}
+function setUnread(n){const b=$('#unread');b.textContent=n;b.hidden=!n}
+
+// ----- messages -----
+async function loadMessages(){
+  const list=await call('/api/admin/messages'),box=$('#t-messages');box.replaceChildren();
+  setUnread(list.filter(m=>!m.is_read).length);
+  if(!list.length){box.append(el('p','empty','No messages yet. They will appear here when someone uses your contact form.'));return}
+  list.forEach(m=>{
+    const c=el('div','card item'+(m.is_read?'':' unread'));
+    const top=el('div','top');top.append(el('b',null,m.name),el('span','meta',m.email+' · '+m.created_at+' UTC'));
+    const act=el('div','actions');
+    const reply=el('a','btn','Reply');reply.href='mailto:'+encodeURIComponent(m.email).replace('%40','@')+'?subject='+encodeURIComponent('Re: your message on my portfolio');
+    const read=el('button',null,m.is_read?'Mark unread':'Mark read');
+    read.onclick=async()=>{try{await call('/api/admin/messages/'+m.id,'PATCH',{is_read:!m.is_read});loadMessages()}catch(e){toast(e.message)}};
+    const del=el('button','danger','Delete');
+    del.onclick=async()=>{if(!confirm('Delete this message?'))return;try{await call('/api/admin/messages/'+m.id,'DELETE');loadMessages()}catch(e){toast(e.message)}};
+    act.append(reply,read,del);
+    c.append(top,el('p',null,m.message),act);box.append(c);
+  });
+}
+
+// ----- projects -----
+async function loadProjects(){
+  const list=await call('/api/admin/projects'),box=$('#t-projects');box.replaceChildren();
+  const add=el('button','primary','+ Add project');add.onclick=()=>editor(box,null);
+  box.append(add);
+  const holder=el('div');holder.style.marginTop='16px';box.append(holder);
+  if(!list.length)holder.append(el('p','empty','No projects yet.'));
+  list.forEach(p=>{
+    const c=el('div','card item');
+    const top=el('div','top');top.append(el('b',null,p.emoji+' '+p.title));
+    const meta=el('span','meta');meta.append(el('span','pill',p.status),' ',el('span','pill',p.category),' ');
+    if(!p.visible)meta.append(el('span','pill','hidden'));
+    top.append(meta);
+    const act=el('div','actions');
+    const ed=el('button',null,'Edit');ed.onclick=()=>editor(box,p);
+    const del=el('button','danger','Delete');
+    del.onclick=async()=>{if(!confirm('Delete "'+p.title+'"?'))return;try{await call('/api/admin/projects/'+p.id,'DELETE');loadProjects()}catch(e){toast(e.message)}};
+    act.append(ed,del);
+    c.append(top,el('p','meta',p.summary),act);holder.append(c);
+  });
+}
+
+function field(label,input){const w=el('div');w.append(el('label',null,label),input);return w}
+function editor(box,p){
+  const f=el('form','card');f.style.marginTop='16px';
+  const inp=(v,ph,type='text')=>{const i=el('input');i.type=type;i.value=v??'';if(ph)i.placeholder=ph;return i};
+  const title=inp(p?.title),summary=el('textarea');summary.rows=2;summary.value=p?.summary||'';
+  const bullets=el('textarea');bullets.rows=4;bullets.value=(p?.bullets||[]).join('\n');
+  const tags=inp((p?.tags||[]).join(', '),'HTML, CSS, JavaScript');
+  const emoji=inp(p?.emoji||'💻'),status=inp(p?.status||'Built','Built / In progress');
+  const cat=el('select');['web','ai','other'].forEach(c=>{const o=el('option',null,c);o.value=c;if((p?.category||'web')===c)o.selected=true;cat.append(o)});
+  const demo=inp(p?.demo_url,'https://…','url'),repo=inp(p?.repo_url,'https://github.com/…','url');
+  const order=inp(p?.sort_order??0,'','number');
+  const vis=el('input');vis.type='checkbox';vis.checked=p?p.visible:true;vis.style.width='auto';
+  const g=el('div','grid2');
+  g.append(field('Title',title),field('Emoji',emoji),field('Status',status),field('Category',cat),field('Live demo URL',demo),field('Code / repo URL',repo),field('Tags (comma separated)',tags),field('Sort order (lower = first)',order));
+  f.append(el('b',null,p?'Edit project':'New project'),g,field('Summary',summary),field('Bullet points (one per line)',bullets));
+  const vl=el('label',null,' Visible on site');vl.prepend(vis);vl.style.display='flex';vl.style.gap='8px';vl.style.alignItems='center';f.append(vl);
+  const row=el('div','actions');row.style.marginTop='16px';
+  const save=el('button','primary','Save');save.type='submit';
+  const cancel=el('button',null,'Cancel');cancel.type='button';cancel.onclick=()=>loadProjects();
+  row.append(save,cancel);f.append(row);
+  f.onsubmit=async e=>{
+    e.preventDefault();save.disabled=true;
+    const body={title:title.value,summary:summary.value,bullets:bullets.value.split('\n'),tags:tags.value.split(','),emoji:emoji.value,status:status.value,
+      category:cat.value,demo_url:demo.value,repo_url:repo.value,sort_order:parseInt(order.value,10)||0,visible:vis.checked};
+    try{
+      if(p)await call('/api/admin/projects/'+p.id,'PUT',body);else await call('/api/admin/projects','POST',body);
+      toast('Saved');loadProjects();
+    }catch(err){toast(err.message);save.disabled=false}
+  };
+  box.querySelectorAll('form').forEach(x=>x.remove());
+  box.insertBefore(f,box.children[1]);f.scrollIntoView({behavior:'smooth',block:'nearest'});title.focus();
+}
+
+if(token)showApp();
+</script>
+</body>
+</html>

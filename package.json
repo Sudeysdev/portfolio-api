@@ -1,0 +1,13 @@
+{
+  "name": "sudeys-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio of Sudeys Feysel with a Node.js + SQLite backend and admin dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": { "node": ">=22.13" },
+  "license": "MIT",
+  "private": true
+}
