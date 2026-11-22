@@ -12,6 +12,7 @@ const { DatabaseSync } = require('node:sqlite');
 const PORT = Number(process.env.PORT) || 3000;
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'portfolio.db');
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const SITE_FILES = /^\/(index\.html|admin\.html|config\.js|photo\.jpg|cv\.pdf)$/;
 // Comma-separated list of sites allowed to call the API from a browser,
 // e.g. "https://sudeysdev.github.io". Same-origin requests never need this.
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -286,8 +287,13 @@ function serveStatic(req, res, url) {
   let rel = decodeURIComponent(url.pathname);
   if (rel.endsWith('/')) rel += 'index.html';
   if (rel === '/admin') rel = '/admin.html';
-  const file = path.normalize(path.join(PUBLIC_DIR, rel));
-  if (!file.startsWith(PUBLIC_DIR + path.sep)) throw new HttpError(403, 'Forbidden');
+  // Normal layout: website files live in /public. If that folder is missing (files uploaded loose at the
+  // top level of the repo), fall back to serving ONLY these exact website files from the top level.
+  const flat = !fs.existsSync(PUBLIC_DIR);
+  if (flat && !SITE_FILES.test(rel)) throw new HttpError(404, 'Not found');
+  const root = flat ? __dirname : PUBLIC_DIR;
+  const file = path.normalize(path.join(root, rel));
+  if (!file.startsWith(root + path.sep)) throw new HttpError(403, 'Forbidden');
   let st;
   try { st = fs.statSync(file); } catch { throw new HttpError(404, 'Not found'); }
   if (!st.isFile()) throw new HttpError(404, 'Not found');
